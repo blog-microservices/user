@@ -34,5 +34,11 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x gradlew
 
-    - name: Build and run tests
+    - name: Build the project and run tests
       run: ./gradlew clean build --stacktrace
+
+    - name: Upload built JAR
+      uses: actions/upload-artifact@v3
+      with:
+        name: spring-boot-app-jar
+        path: build/libs/*.jar
