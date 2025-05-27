@@ -1,4 +1,4 @@
-name: Build and Test Spring Boot Application
+name: Build and Upload Spring Boot JAR
 
 on:
   push:
@@ -34,12 +34,18 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x gradlew
 
-    - name: Build the project and run tests
+    - name: Build and test
       run: ./gradlew clean build --stacktrace
 
-    - name: Upload built JAR
+    - name: Get JAR filename
+      id: get-jar
+      run: |
+        JAR_NAME=$(ls build/libs/*.jar | xargs -n 1 basename)
+        echo "JAR_NAME=$JAR_NAME" >> $GITHUB_ENV
+        echo "artifact_name=${JAR_NAME%.*}" >> $GITHUB_OUTPUT
+
+    - name: Upload JAR with dynamic artifact name
       uses: actions/upload-artifact@v4
       with:
-        name: $(basename build/libs/*.jar .jar)
-        path: build/libs/*.jar
-
+        name: ${{ steps.get-jar.outputs.artifact_name }}
+        path: build/libs/${{ env.JAR_NAME }}
