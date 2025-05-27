@@ -1,4 +1,4 @@
-name: Build and Upload Spring Boot JAR
+name: Build and Upload Spring Boot BootJar
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +20,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Cache Gradle dependencies
+    - name: Cache Gradle
       uses: actions/cache@v3
       with:
         path: |
@@ -31,22 +30,22 @@ jobs:
         restore-keys: |
           gradle-${{ runner.os }}-
 
-    - name: Make gradlew executable
+    - name: Make Gradle wrapper executable
       run: chmod +x gradlew
 
-    - name: Build and test
+    - name: Build project
       run: ./gradlew clean build --stacktrace
 
-    - name: Get JAR filename
-      id: get-jar
+    - name: Find Spring Boot executable JAR
+      id: bootjar
       run: |
-        JAR_NAME=$(basename build/libs/*.jar)
-        echo "JAR_NAME=$JAR_NAME" >> $GITHUB_ENV
-        ARTIFACT_NAME="${JAR_NAME%.*}"
-        echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+        BOOT_JAR=$(find build/libs -maxdepth 1 -type f -name "*.jar" ! -name "*plain*.jar")
+        BOOT_JAR_NAME=$(basename "$BOOT_JAR")
+        echo "BOOT_JAR=$BOOT_JAR_NAME" >> $GITHUB_ENV
+        echo "artifact_name=${BOOT_JAR_NAME%.*}" >> $GITHUB_OUTPUT
 
-    - name: Upload JAR with dynamic artifact name
+    - name: Upload Spring Boot executable JAR
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.get-jar.outputs.artifact_name }}
-        path: build/libs/${{ env.JAR_NAME }}
+        name: ${{ steps.bootjar.outputs.artifact_name }}
+        path: build/libs/${{ env.BOOT_JAR }}
