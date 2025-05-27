@@ -40,9 +40,10 @@ jobs:
     - name: Get JAR filename
       id: get-jar
       run: |
-        JAR_NAME=$(ls build/libs/*.jar | xargs -n 1 basename)
+        JAR_NAME=$(basename build/libs/*.jar)
         echo "JAR_NAME=$JAR_NAME" >> $GITHUB_ENV
-        echo "artifact_name=${JAR_NAME%.*}" >> $GITHUB_OUTPUT
+        ARTIFACT_NAME="${JAR_NAME%.*}"
+        echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
 
     - name: Upload JAR with dynamic artifact name
       uses: actions/upload-artifact@v4
